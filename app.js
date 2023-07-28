@@ -224,41 +224,83 @@ app.post("/compose", upload.single("uploadedImage"), (req, res) => {
   });
 });
 
-app.get("/posts/:postId", (req, res) => {
-  let postId = req.params.postId;
-  BlogPost.findOne({ _id: postId }, (err, doc) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send("Internal Server Error");
-    }
-    if (doc) {
-      res.render("post", { post: doc });
+// app.get("/posts/:postId", (req, res) => {
+//   let postId = req.params.postId;
+//   BlogPost.findOne({ _id: postId }, (err, doc) => {
+//     if (err) {
+//       console.log(err);
+//       return res.status(500).send("Internal Server Error");
+//     }
+//     if (doc) {
+//       res.render("post", { post: doc });
+//     } else {
+//       res.status(404).send("Post not found");
+//     }
+//   });
+// });
+
+app.get("/posts/:postId", async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const post = await BlogPost.findOne({ _id: postId });
+    if (post) {
+      res.render("post", { post: post });
     } else {
       res.status(404).send("Post not found");
     }
-  });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-app.get("/delete/:deleteId", (req, res) => {
-  let deleteId = req.params.deleteId;
-  BlogPost.deleteOne({ _id: deleteId }, (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send("Internal Server Error");
-    }
+// app.get("/delete/:deleteId", (req, res) => {
+//   let deleteId = req.params.deleteId;
+//   BlogPost.deleteOne({ _id: deleteId }, (err) => {
+//     if (err) {
+//       console.log(err);
+//       return res.status(500).send("Internal Server Error");
+//     }
+//     res.redirect("/");
+//   });
+// });
+
+
+app.get("/delete/:deleteId", async (req, res) => {
+  try {
+    const deleteId = req.params.deleteId;
+    await BlogPost.deleteOne({ _id: deleteId });
     res.redirect("/");
-  });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-app.get("/update/:updateId", (req, res) => {
-  let updateId = req.params.updateId;
-  BlogPost.findOne({ _id: updateId }, (err, doc) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send("Internal Server Error");
+// app.get("/update/:updateId", (req, res) => {
+//   let updateId = req.params.updateId;
+//   BlogPost.findOne({ _id: updateId }, (err, doc) => {
+//     if (err) {
+//       console.log(err);
+//       return res.status(500).send("Internal Server Error");
+//     }
+//     res.render("update", { title: doc.title, content: doc.content, id: updateId });
+//   });
+// });
+
+app.get("/update/:updateId", async (req, res) => {
+  try {
+    const updateId = req.params.updateId;
+    const post = await BlogPost.findOne({ _id: updateId });
+    if (post) {
+      res.render("update", { title: post.title, content: post.content, id: updateId });
+    } else {
+      res.status(404).send("Post not found");
     }
-    res.render("update", { title: doc.title, content: doc.content, id: updateId });
-  });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.post("/update", (req, res) => {
