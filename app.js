@@ -186,7 +186,45 @@ app.get("/compose", function (req, res) {
   res.render("compose");
 });
 
-app.post("/compose", upload.single("uploadedImage"), (req, res) => {
+// app.post("/compose", upload.single("uploadedImage"), (req, res) => {
+//   const title = req.body.title;
+//   const content = req.body.post;
+//   let image = req.body.image;
+
+//   if (!image || image === "") {
+//     image = "gridimage-" + utilities.getRandomInt(6).toString() + ".jpeg";
+//   }
+
+//   var newPost;
+//   if (!req.file) {
+//     newPost = new BlogPost({
+//       title: title,
+//       content: content,
+//       postedDate: utilities.getDate(),
+//       image: image,
+//     });
+//   } else {
+//     newPost = new BlogPost({
+//       title: title,
+//       content: content,
+//       postedDate: utilities.getDate(),
+//       imageFile: {
+//         data: req.file.buffer,
+//         contentType: "image/png",
+//       },
+//     });
+//   }
+
+//   newPost.save((err) => {
+//     if (err) {
+//       console.log(err);
+//       return res.status(500).send("Internal Server Error");
+//     }
+//     res.redirect("/");
+//   });
+// });
+
+app.post("/compose", upload.single("uploadedImage"), async (req, res) => {
   const title = req.body.title;
   const content = req.body.post;
   let image = req.body.image;
@@ -195,34 +233,35 @@ app.post("/compose", upload.single("uploadedImage"), (req, res) => {
     image = "gridimage-" + utilities.getRandomInt(6).toString() + ".jpeg";
   }
 
-  var newPost;
-  if (!req.file) {
-    newPost = new BlogPost({
-      title: title,
-      content: content,
-      postedDate: utilities.getDate(),
-      image: image,
-    });
-  } else {
-    newPost = new BlogPost({
-      title: title,
-      content: content,
-      postedDate: utilities.getDate(),
-      imageFile: {
-        data: req.file.buffer,
-        contentType: "image/png",
-      },
-    });
-  }
-
-  newPost.save((err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).send("Internal Server Error");
+  try {
+    let newPost;
+    if (!req.file) {
+      newPost = new BlogPost({
+        title: title,
+        content: content,
+        postedDate: utilities.getDate(),
+        image: image,
+      });
+    } else {
+      newPost = new BlogPost({
+        title: title,
+        content: content,
+        postedDate: utilities.getDate(),
+        imageFile: {
+          data: req.file.buffer,
+          contentType: "image/png",
+        },
+      });
     }
+
+    await newPost.save();
     res.redirect("/");
-  });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
 
 // app.get("/posts/:postId", (req, res) => {
 //   let postId = req.params.postId;
